@@ -1,5 +1,5 @@
-#![localpulse](https://github.com/user-attachments/assets/07bc7dd8-85ad-45e8-9d84-1da267a4384d)
-# Inspiration
+![localpulse](https://github.com/user-attachments/assets/07bc7dd8-85ad-45e8-9d84-1da267a4384d)
+## Inspiration
 The inspiration for LocalPulse came from the desire to foster stronger, more informed, and engaged communities. We recognized a gap in the accessibility of local information - often scattered across various sources or simply not available to residents. By bringing together data on crime, small businesses, real estate trends, and more, we aimed to create a unified platform that allows individuals to feel more connected, safe, and empowered in their neighborhoods. Our goal is to transform communities through transparency, insight, and engagement.
 
 ## What it does
