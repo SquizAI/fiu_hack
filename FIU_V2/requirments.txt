@@ -3,7 +3,6 @@ pandas
 numpy
 pydeck
 requests
-census
 us
 newsapi-python
 textblob
