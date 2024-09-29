@@ -1,0 +1,14 @@
+streamlit
+pandas
+numpy
+pydeck
+requests
+census
+us
+newsapi-python
+textblob
+wordcloud
+matplotlib
+plotly
+psycopg2-binary
+scikit-learn
