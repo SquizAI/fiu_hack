@@ -12,3 +12,4 @@ matplotlib
 plotly
 psycopg2-binary
 scikit-learn
+census
