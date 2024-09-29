@@ -27,9 +27,10 @@ requests==2.31.0
 # Document & Report Generation
 reportlab==3.6.12
 
-# Streamlit Components
-streamlit-components==0.1.0
+# Computer Vision
+opencv-python==4.8.0.76
+ultralytics==8.0.20
 
-# Utility Libraries
-re==builtin
-hashlib==builtin
+# Additional Dependencies
+
+
