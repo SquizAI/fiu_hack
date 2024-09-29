@@ -1,0 +1,32 @@
+# Core Libraries
+streamlit
+pandas
+numpy
+
+# Data Visualization
+plotly
+matplotlib
+wordcloud
+pydeck
+folium
+streamlit-folium
+
+# Natural Language Processing
+textblob
+deep-translator
+
+# Machine Learning & AI
+scikit-learn
+pydantic
+langchain-community
+google-generativeai
+
+# Computer Vision
+opencv-python
+ultralytics
+
+# Web & API Interaction
+requests
+
+# Document & Report Generation
+reportlab
