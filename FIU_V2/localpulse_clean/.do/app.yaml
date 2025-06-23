@@ -42,6 +42,4 @@ static_sites:
   - key: API_BASE_URL
     value: ${backend.PRIVATE_URL}
 
-domains:
-- domain: localpulse-dashboard.ondigitalocean.app
-  type: PRIMARY 
+# Domains will be auto-assigned by DigitalOcean 
