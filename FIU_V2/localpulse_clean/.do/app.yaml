@@ -2,12 +2,12 @@ name: localpulse-dashboard
 region: nyc
 
 services:
-- name: backend
+- name: api
   source_dir: FIU_V2/localpulse_clean
   github:
     repo: SquizAI/fiu_hack
     branch: main
-  run_command: npm start
+  run_command: node server.js
   environment_slug: node-js
   instance_count: 1
   instance_size_slug: basic-xxs
