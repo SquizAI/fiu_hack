@@ -240,7 +240,7 @@ class LocalPulseDashboard {
         
         try {
             // Fetch real data from the new API server
-            const response = await fetch(`http://localhost:8080/api/dashboard/${timeframe}`);
+            const response = await fetch(`http://localhost:3002/api/dashboard/${timeframe}`);
             const result = await response.json();
             
             if (result.success) {
@@ -282,7 +282,7 @@ class LocalPulseDashboard {
         
         try {
             // Fetch view-specific data from API server
-            const response = await fetch(`http://localhost:8080/api/dashboard/view/${view}`);
+            const response = await fetch(`http://localhost:3002/api/dashboard/view/${view}`);
             const result = await response.json();
             
             if (result.success) {
@@ -317,7 +317,7 @@ class LocalPulseDashboard {
         
         try {
             // Fetch trend data from API server
-            const response = await fetch(`http://localhost:8080/api/trends/${metric}?days=30`);
+            const response = await fetch(`http://localhost:3002/api/trends/${metric}?days=30`);
             const result = await response.json();
             
             if (result.success) {
@@ -1199,17 +1199,11 @@ class LocalPulseDashboard {
         }
     }
 
-    async initializeWindyMap() {
+    initializeWindyMap() {
+        // Initialize Windy map with API key
+        const windyApiKey = '5jVQqxUM3iRPuBsAXVG8PtE0ORCktGCf';
+        
         try {
-            // Get API key from server (secure)
-            const configResponse = await fetch('/api/config/windy-key');
-            const config = await configResponse.json();
-            const windyApiKey = config.apiKey;
-            
-            if (!windyApiKey || windyApiKey === 'YOUR_WINDY_API_KEY_HERE') {
-                console.warn('⚠️ Windy API key not configured');
-                return;
-            }
             // Windy map configuration
             const options = {
                 key: windyApiKey,
@@ -1305,7 +1299,7 @@ class LocalPulseDashboard {
     async loadCurrentWeather() {
         try {
             // Use OpenWeatherMap for current conditions
-            const response = await fetch(`http://localhost:8080/api/weather/current`);
+            const response = await fetch(`http://localhost:3002/api/weather/current`);
             
             if (response.ok) {
                 const weatherData = await response.json();
@@ -1332,42 +1326,29 @@ class LocalPulseDashboard {
 
     async loadWeatherForecast() {
         try {
-            const response = await fetch(`http://localhost:8080/api/weather/forecast`);
+            const response = await fetch(`http://localhost:3002/api/weather/forecast`);
             
             if (response.ok) {
-                const result = await response.json();
+                const forecastData = await response.json();
                 
-                if (result.success && result.forecast && Array.isArray(result.forecast)) {
-                    // Display 5-day forecast
-                    const forecastHtml = result.forecast.map(day => {
-                        const date = new Date(day.date);
-                        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                        
-                        return `
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="fw-bold">${dayName}</div>
-                                <div class="text-end">
-                                    <div>${day.high}°/${day.low}°</div>
-                                    <small class="text-muted">${day.description}</small>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                    
-                    document.getElementById('weather-forecast').innerHTML = forecastHtml;
-                    console.log('✅ Weather forecast loaded from OpenWeatherMap');
-                } else {
-                    throw new Error('Invalid forecast data format');
-                }
-            } else {
-                throw new Error(`API error: ${response.status}`);
+                // Display 5-day forecast
+                const forecastHtml = forecastData.map(day => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold">${day.day}</div>
+                        <div class="text-end">
+                            <div>${day.high}°/${day.low}°</div>
+                            <small class="text-muted">${day.condition}</small>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('weather-forecast').innerHTML = forecastHtml;
+                
+                console.log('✅ Weather forecast loaded');
             }
         } catch (error) {
             console.error('❌ Failed to load weather forecast:', error);
-            const forecastElement = document.getElementById('weather-forecast');
-            if (forecastElement) {
-                forecastElement.innerHTML = '<div class="text-muted">Forecast unavailable - API key required</div>';
-            }
+            document.getElementById('weather-forecast').innerHTML = '<div class="text-muted">Forecast unavailable</div>';
         }
     }
 
@@ -1644,7 +1625,7 @@ class LocalPulseDashboard {
             const crimeData = await this.apiIntegration.fetchRealCrimeData();
             
             // Call the real API server for AI analysis
-            const response = await fetch('http://localhost:8080/api/ai/analyze', {
+            const response = await fetch('http://localhost:3002/api/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1678,7 +1659,7 @@ class LocalPulseDashboard {
             const trafficData = await this.apiIntegration.fetchRealTrafficData();
             
             // Call the real API server for AI analysis
-            const response = await fetch('http://localhost:8080/api/ai/analyze', {
+            const response = await fetch('http://localhost:3002/api/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1712,7 +1693,7 @@ class LocalPulseDashboard {
             const socialData = []; // No sample data
             
             // Call the real API server for AI analysis
-            const response = await fetch('http://localhost:8080/api/ai/analyze', {
+            const response = await fetch('http://localhost:3002/api/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

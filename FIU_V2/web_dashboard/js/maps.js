@@ -24,7 +24,7 @@ class MapManager {
         
         // Fallback to your actual token if configuration fails
         console.warn('⚠️ Using fallback Mapbox token');
-        return 'YOUR_MAPBOX_TOKEN_HERE';
+        return 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA';
     }
 
     initializeMainMap() {
@@ -671,195 +671,39 @@ class MapManager {
     displayCrimeAnalysis(analysis) {
         const modalHtml = `
             <div class="modal fade" id="crimeAnalysisModal" tabindex="-1">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header bg-gradient text-white" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
-                            <h5 class="modal-title d-flex align-items-center">
-                                <i class="fas fa-brain me-2 fa-lg"></i>
-                                <span class="fw-bold">AI Crime Analysis</span>
-                                <span class="badge bg-light text-dark ms-2 fs-6">LIVE</span>
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-brain"></i> AI Crime Analysis</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="modal-body p-4">
-                            <!-- Analysis Summary -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="card border-0 bg-light">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <i class="fas fa-shield-alt text-primary fa-2x me-3"></i>
-                                                <div>
-                                                    <h6 class="mb-1 fw-bold">Analysis Summary</h6>
-                                                    <small class="text-muted">Generated ${new Date().toLocaleString()}</small>
-                                                </div>
-                                            </div>
-                                            <p class="mb-0 lead">${analysis.summary || 'Crime analysis completed successfully'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Key Metrics -->
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
-                                            <h6 class="card-title">Risk Level</h6>
-                                            <span class="badge ${this.getRiskBadgeClass(analysis.riskLevel || 'MEDIUM')} fs-6">
-                                                ${(analysis.riskLevel || 'MEDIUM').toUpperCase()}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
-                                            <h6 class="card-title">Trends Analyzed</h6>
-                                            <h4 class="text-primary">${(analysis.trends || []).length}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-map-marker-alt fa-2x text-danger mb-2"></i>
-                                            <h6 class="card-title">Hotspots</h6>
-                                            <h4 class="text-danger">${(analysis.hotspots || []).length}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-lightbulb fa-2x text-success mb-2"></i>
-                                            <h6 class="card-title">Recommendations</h6>
-                                            <h4 class="text-success">${(analysis.recommendations || []).length}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Crime Trends -->
-                            ${(analysis.trends && analysis.trends.length > 0) ? `
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h6 class="fw-bold mb-3"><i class="fas fa-chart-bar me-2"></i>Crime Trends</h6>
-                                    <div class="row">
-                                        ${analysis.trends.map(trend => `
-                                            <div class="col-md-6 mb-3">
-                                                <div class="card border-0 h-100">
-                                                    <div class="card-body">
-                                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <h6 class="card-title mb-0">${trend.crime_type || trend.type}</h6>
-                                                            <span class="badge bg-${trend.risk_level === 'high' ? 'danger' : trend.risk_level === 'medium' ? 'warning' : 'success'} fs-6">
-                                                                ${(trend.risk_level || 'medium').toUpperCase()}
-                                                            </span>
-                                                        </div>
-                                                        <p class="text-muted mb-2">${trend.trend || 'Stable'} trend</p>
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="badge ${(trend.percentage_change || 0) >= 0 ? 'bg-danger' : 'bg-success'} me-2">
-                                                                ${(trend.percentage_change || 0) >= 0 ? '+' : ''}${trend.percentage_change || 0}%
-                                                            </span>
-                                                            <small class="text-muted">vs last period</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
-
-                            <!-- Hotspots -->
-                            ${(analysis.hotspots && analysis.hotspots.length > 0) ? `
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h6 class="fw-bold mb-3"><i class="fas fa-fire me-2"></i>Crime Hotspots</h6>
-                                    <div class="row">
-                                        ${analysis.hotspots.map(hotspot => `
-                                            <div class="col-md-4 mb-3">
-                                                <div class="card border-0 h-100">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title">${hotspot.location}</h6>
-                                                        <p class="card-text">
-                                                            <span class="badge bg-danger">${hotspot.crime_count} incidents</span>
-                                                            <br><small class="text-muted">Primary: ${hotspot.primary_crime_type}</small>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
-
-                            <!-- Recommendations -->
+                        <div class="modal-body">
                             <div class="row">
+                                <div class="col-12">
+                                    <h6>Summary</h6>
+                                    <p class="text-muted">${analysis.summary}</p>
+                                </div>
                                 <div class="col-md-6">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>AI Recommendations</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <ul class="list-unstyled mb-0">
-                                                ${(analysis.recommendations || [
-                                                    'Increase patrol frequency in high-risk areas',
-                                                    'Enhance lighting in identified hotspots',
-                                                    'Implement community watch programs',
-                                                    'Deploy additional surveillance cameras'
-                                                ]).map(rec => `
-                                                    <li class="mb-2">
-                                                        <i class="fas fa-check-circle text-success me-2"></i>
-                                                        ${rec}
-                                                    </li>
-                                                `).join('')}
-                                            </ul>
-                                        </div>
+                                    <h6>Crime Trends</h6>
+                                    <div class="list-group">
+                                        ${analysis.trends.map(trend => `
+                                            <div class="list-group-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <strong>${trend.crime_type}</strong>
+                                                    <span class="badge bg-${trend.risk_level === 'high' ? 'danger' : trend.risk_level === 'medium' ? 'warning' : 'success'}">${trend.risk_level}</span>
+                                                </div>
+                                                <small class="text-muted">${trend.trend} (${trend.percentage_change > 0 ? '+' : ''}${trend.percentage_change}%)</small>
+                                            </div>
+                                        `).join('')}
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-header bg-info text-white">
-                                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Analysis Details</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-3">
-                                                <small class="text-muted">Confidence Level:</small>
-                                                <div class="progress mt-1" style="height: 8px;">
-                                                    <div class="progress-bar bg-success" style="width: ${Math.round((analysis.confidence || 0.82) * 100)}%"></div>
-                                                </div>
-                                                <small class="text-muted">${Math.round((analysis.confidence || 0.82) * 100)}%</small>
-                                            </div>
-                                            <div class="mb-3">
-                                                <small class="text-muted">Data Sources:</small>
-                                                <br><span class="badge bg-secondary me-1">Miami-Dade PD</span>
-                                                <span class="badge bg-secondary me-1">311 Reports</span>
-                                                <span class="badge bg-secondary">Live Incidents</span>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted">Last Updated:</small>
-                                                <br><strong>${new Date().toLocaleString()}</strong>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <h6>Recommendations</h6>
+                                    <ul class="list-unstyled">
+                                        ${analysis.recommendations.map(rec => `<li><i class="fas fa-check text-success"></i> ${rec}</li>`).join('')}
+                                    </ul>
                                 </div>
                             </div>
-                        </div>
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-1"></i>Close
-                            </button>
-                            <button type="button" class="btn btn-primary" onclick="window.print()">
-                                <i class="fas fa-download me-1"></i>Export Report
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="mapManager.performAIAnalysis('crime')">
-                                <i class="fas fa-sync-alt me-1"></i>Refresh Analysis
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -886,218 +730,75 @@ class MapManager {
             return;
         }
 
-        const modalHtml = `
-            <div class="modal fade" id="trafficAnalysisModal" tabindex="-1">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <h5 class="modal-title d-flex align-items-center">
-                                <i class="fas fa-brain me-2 fa-lg"></i>
-                                <span class="fw-bold">AI Traffic Analysis</span>
-                                <span class="badge bg-light text-dark ms-2 fs-6">LIVE</span>
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body p-4">
-                            <!-- Analysis Summary -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="card border-0 bg-light">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <i class="fas fa-chart-line text-primary fa-2x me-3"></i>
-                                                <div>
-                                                    <h6 class="mb-1 fw-bold">Analysis Summary</h6>
-                                                    <small class="text-muted">Generated ${new Date().toLocaleString()}</small>
-                                                </div>
-                                            </div>
-                                            <p class="mb-0 lead">${analysis.summary || 'Traffic analysis completed successfully'}</p>
-                                        </div>
-                                    </div>
-                                </div>
+        const analysisHtml = `
+            <div class="analysis-popup">
+                <div class="analysis-header">
+                    <h5><i class="fas fa-brain"></i> AI Traffic Analysis</h5>
+                    <button type="button" class="btn-close" onclick="this.closest('.analysis-popup').remove()"></button>
+                </div>
+                <div class="analysis-content">
+                    <div class="analysis-summary">
+                        <h6>Summary</h6>
+                        <p>${analysis.summary || 'Analysis completed'}</p>
+                    </div>
+                    
+                    ${analysis.insights && analysis.insights.length > 0 ? `
+                    <div class="analysis-insights">
+                        <h6>Key Insights</h6>
+                        <ul>
+                            ${analysis.insights.map(insight => `<li>${insight}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    ${analysis.recommendations && analysis.recommendations.length > 0 ? `
+                    <div class="analysis-recommendations">
+                        <h6>Recommendations</h6>
+                        <ul>
+                            ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="analysis-footer">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Risk Level:</small>
+                                <span class="badge ${this.getRiskBadgeClass(analysis.riskLevel || 'MEDIUM')}">${analysis.riskLevel || 'MEDIUM'}</span>
                             </div>
-
-                            <!-- Key Metrics -->
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-traffic-light fa-2x text-warning mb-2"></i>
-                                            <h6 class="card-title">Overall Status</h6>
-                                            <span class="badge ${this.getStatusBadgeClass(analysis.overall_status || 'MODERATE')} fs-6">
-                                                ${(analysis.overall_status || 'MODERATE').toUpperCase()}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-route fa-2x text-info mb-2"></i>
-                                            <h6 class="card-title">Routes Analyzed</h6>
-                                            <h4 class="text-primary">${(analysis.routes || []).length}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
-                                            <h6 class="card-title">Active Incidents</h6>
-                                            <h4 class="text-danger">${(analysis.incidents || []).length}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-clock fa-2x text-success mb-2"></i>
-                                            <h6 class="card-title">Avg Delay</h6>
-                                            <h4 class="text-success">${Math.round((analysis.routes || []).reduce((sum, r) => sum + (r.estimated_delay || 0), 0) / Math.max((analysis.routes || []).length, 1))} min</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Route Analysis -->
-                            ${(analysis.routes && analysis.routes.length > 0) ? `
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h6 class="fw-bold mb-3"><i class="fas fa-road me-2"></i>Route Analysis</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th>Route</th>
-                                                    <th>Current Speed</th>
-                                                    <th>Congestion</th>
-                                                    <th>Delay</th>
-                                                    <th>Incidents</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${analysis.routes.map(route => `
-                                                    <tr>
-                                                        <td>
-                                                            <strong>${route.route_name || route.name || 'Unknown Route'}</strong>
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge bg-info">${route.current_speed || 25} mph</span>
-                                                            <br><small class="text-muted">Normal: ${route.normal_speed || 35} mph</small>
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge ${this.getCongestionBadgeClass(route.congestion_level || 'Moderate')}">
-                                                                ${route.congestion_level || 'Moderate'}
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <span class="fw-bold">${route.estimated_delay || Math.floor(Math.random() * 10) + 2} min</span>
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge ${(route.incidents || 0) > 0 ? 'bg-warning' : 'bg-success'}">
-                                                                ${route.incidents || 0}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                `).join('')}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
-
-                            <!-- Recommendations -->
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>AI Recommendations</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <ul class="list-unstyled mb-0">
-                                                ${(analysis.recommendations || [
-                                                    'Monitor traffic signal timing optimization',
-                                                    'Consider alternative routes during peak hours',
-                                                    'Implement dynamic routing suggestions',
-                                                    'Increase public transit frequency'
-                                                ]).map(rec => `
-                                                    <li class="mb-2">
-                                                        <i class="fas fa-check-circle text-success me-2"></i>
-                                                        ${rec}
-                                                    </li>
-                                                `).join('')}
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card border-0 h-100">
-                                        <div class="card-header bg-info text-white">
-                                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Analysis Details</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-3">
-                                                <small class="text-muted">Confidence Level:</small>
-                                                <div class="progress mt-1" style="height: 8px;">
-                                                    <div class="progress-bar bg-success" style="width: ${Math.round((analysis.confidence || 0.85) * 100)}%"></div>
-                                                </div>
-                                                <small class="text-muted">${Math.round((analysis.confidence || 0.85) * 100)}%</small>
-                                            </div>
-                                            <div class="mb-3">
-                                                <small class="text-muted">Data Sources:</small>
-                                                <br><span class="badge bg-secondary me-1">FDOT Traffic</span>
-                                                <span class="badge bg-secondary me-1">Miami-Dade 311</span>
-                                                <span class="badge bg-secondary">Live Cameras</span>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted">Last Updated:</small>
-                                                <br><strong>${new Date().toLocaleString()}</strong>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="col-6 text-end">
+                                <small class="text-muted">Confidence: ${Math.round((analysis.confidence || 0.75) * 100)}%</small>
                             </div>
                         </div>
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-1"></i>Close
-                            </button>
-                            <button type="button" class="btn btn-primary" onclick="window.print()">
-                                <i class="fas fa-download me-1"></i>Export Report
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="mapManager.performAIAnalysis('traffic')">
-                                <i class="fas fa-sync-alt me-1"></i>Refresh Analysis
-                            </button>
+                        <div class="mt-2">
+                            <small class="text-muted">Source: ${analysis.dataSource || 'LocalPulse Analytics'}</small>
                         </div>
                     </div>
                 </div>
             </div>
         `;
 
-        // Remove existing modal
-        const existingModal = document.getElementById('trafficAnalysisModal');
-        if (existingModal) {
-            existingModal.remove();
+        // Remove existing analysis popup
+        const existingPopup = document.querySelector('.analysis-popup');
+        if (existingPopup) {
+            existingPopup.remove();
         }
 
-        // Add modal to page
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('trafficAnalysisModal'));
-        modal.show();
-    }
+        // Add new analysis popup
+        const popupDiv = document.createElement('div');
+        popupDiv.innerHTML = analysisHtml;
+        popupDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        `;
 
-    getStatusBadgeClass(status) {
-        const classes = {
-            'EXCELLENT': 'bg-success',
-            'GOOD': 'bg-info', 
-            'MODERATE': 'bg-warning',
-            'POOR': 'bg-danger',
-            'CRITICAL': 'bg-dark'
-        };
-        return classes[status] || 'bg-warning';
+        document.body.appendChild(popupDiv);
     }
 
     getRiskBadgeClass(riskLevel) {

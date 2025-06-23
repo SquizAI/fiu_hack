@@ -3,7 +3,6 @@ const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const fetch = require('node-fetch');
-const OpenAI = require('openai');
 
 // Load environment variables
 dotenv.config({ path: '../.env' });
@@ -12,11 +11,6 @@ dotenv.config();
 
 const app = express();
 const PORT = 8080;
-
-// Initialize OpenAI with the latest GPT-4o model
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Middleware with enhanced CORS for HLS streams
 app.use(cors({
@@ -49,11 +43,7 @@ app.get('/api/proxy/hls', async (req, res) => {
                 'Accept': '*/*',
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Cache-Control': 'no-cache'
-            },
-            // Handle SSL certificate issues
-            agent: url.startsWith('https:') ? 
-                new (require('https').Agent)({ rejectUnauthorized: false }) : 
-                undefined
+            }
         });
         
         if (!response.ok) {
@@ -78,34 +68,24 @@ app.get('/api/proxy/hls', async (req, res) => {
     }
 });
 
-// HLS Camera URLs for vehicle detection (verified working streams)
+// HLS Camera URLs for vehicle detection
 const HLS_CAMERA_URLS = [
     'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    'https://demo-live.eonet.no/hls/camera1_main/playlist.m3u8',
+    'https://demo-live.eonet.no/hls/camera2_main/playlist.m3u8',
+    'https://dim-se12.divas.cloud:8200/chan-3732/index.m3u8?token=bfcd28f8465ebc94c040d31087d264796b2ba928e1745a16b5170017bd005717',
+    'https://dim-se8.divas.cloud:8200/chan-8486/index.m3u8?token=29238149597848403922f018a7c856abb083c6a3b6a1dbc23f8c05a143ef9e2c',
     'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8',
-    'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
-    'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
-    'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
-    'https://playertest.longtailvideo.com/adaptive/bbbfull/bbbfull.m3u8'
+    'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8'
 ];
 
 // Vehicle detection camera endpoints
 app.get('/api/cameras/list', (req, res) => {
-    const cameraNames = [
-        '🎬 Test Stream (MUX)',
-        '🎭 Sintel Movie',
-        '🐰 Big Buck Bunny',
-        '⚔️ Tears of Steel',
-        '📱 Apple Demo Stream',
-        '🔴 Live Test Stream',
-        '🎥 Big Buck Bunny Full'
-    ];
-    
     res.json({
         success: true,
         cameras: HLS_CAMERA_URLS.map((url, index) => ({
             id: index,
-            name: cameraNames[index] || `Camera ${index + 1}`,
+            name: `Camera ${index + 1}`,
             url: url,
             type: url.includes('.m3u8') ? 'hls' : 'mp4',
             proxyUrl: `http://localhost:8080/api/proxy/url_${index}/${url.split('/').pop()}`
@@ -133,11 +113,7 @@ app.get('/api/proxy/url_:urlIndex/:filename', async (req, res) => {
                 'User-Agent': 'LocalPulse-Vehicle-Detection/1.0',
                 'Accept': '*/*',
                 'Cache-Control': 'no-cache'
-            },
-            // Handle SSL certificate issues
-            agent: targetUrl.startsWith('https:') ? 
-                new (require('https').Agent)({ rejectUnauthorized: false }) : 
-                undefined
+            }
         });
         
         if (!response.ok) {
@@ -154,90 +130,12 @@ app.get('/api/proxy/url_:urlIndex/:filename', async (req, res) => {
             'Cache-Control': 'no-cache, no-store, must-revalidate'
         });
         
-        // For M3U8 playlists, we need to modify relative URLs
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('application/vnd.apple.mpegurl') || targetUrl.includes('.m3u8')) {
-            const text = await response.text();
-            
-            // Replace relative URLs with proxy URLs
-            const modifiedText = text.replace(/^(?!https?:\/\/)([^\s\n]+\.m3u8)/gm, (match) => {
-                return `http://localhost:8080/api/proxy/url_${cameraIndex}/${match}`;
-            });
-            
-            res.send(modifiedText);
-        } else {
-            // Stream other content directly
-            response.body.pipe(res);
-        }
+        // Stream the response
+        response.body.pipe(res);
         
     } catch (error) {
         console.error(`❌ HLS proxy failed for ${targetUrl}:`, error.message);
         res.status(500).json({ error: 'Proxy request failed', details: error.message });
-    }
-});
-
-// Proxy endpoint for camera images to handle CORS
-app.get('/api/camera-image/:cameraId', async (req, res) => {
-    try {
-        const { cameraId } = req.params;
-        
-        // Map camera IDs to FL511 URLs
-        const cameraUrls = {
-            '95-079': 'https://fl511.com/map/Cctv/95-079',
-            '95-095': 'https://fl511.com/map/Cctv/95-095', 
-            '95-103': 'https://fl511.com/map/Cctv/95-103',
-            '95-125': 'https://fl511.com/map/Cctv/95-125',
-            'US1-008': 'https://fl511.com/map/Cctv/US1-008',
-            '826-025': 'https://fl511.com/map/Cctv/826-025',
-            '836-010': 'https://fl511.com/map/Cctv/836-010',
-            '112-020': 'https://fl511.com/map/Cctv/112-020'
-        };
-        
-        const url = cameraUrls[cameraId];
-        if (!url) {
-            return res.status(400).json({ error: 'Invalid camera ID' });
-        }
-        
-        console.log(`📷 Proxying camera image: ${url}`);
-        
-        const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'image/*,*/*',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Cache-Control': 'no-cache',
-                'Referer': 'https://fl511.com/'
-            },
-            // Handle SSL certificate issues
-            agent: url.startsWith('https:') ? 
-                new (require('https').Agent)({ rejectUnauthorized: false }) : 
-                undefined
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Camera proxy error: ${response.status}`);
-        }
-        
-        // Set appropriate headers for image
-        res.set({
-            'Content-Type': response.headers.get('content-type') || 'image/jpeg',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-        });
-        
-        // Stream the image response
-        response.body.pipe(res);
-        
-    } catch (error) {
-        console.error('Camera Image Proxy Error:', error);
-        res.status(500).json({ 
-            error: 'Failed to proxy camera image',
-            details: error.message 
-        });
     }
 });
 
@@ -255,127 +153,6 @@ app.get('/api/vehicle-detection/stats', (req, res) => {
         },
         congestionLevel: Math.random() > 0.7 ? 'heavy' : Math.random() > 0.4 ? 'moderate' : 'light',
         cameraStatus: 'active'
-    });
-});
-
-// Social Media Posts endpoint - REAL Miami-Dade social data
-app.get('/api/social/posts', async (req, res) => {
-    try {
-        const { timeframe = '24h' } = req.query;
-        console.log(`📱 Generating realistic Miami-Dade social media data for: ${timeframe}`);
-        
-        // Generate realistic social media posts based on actual Miami events and issues
-        const miamiTopics = [
-            'Traffic on I-95 is crazy today! Anyone else stuck?',
-            'Beautiful sunset at Bayfront Park tonight 🌅',
-            'Construction on Biscayne Blvd causing major delays',
-            'Miami Heat game traffic is insane downtown',
-            'Love the new bike lanes on Coral Way!',
-            'Parking meters broken again on Lincoln Road',
-            'Amazing food truck festival in Wynwood this weekend',
-            'Storm flooding on US-1 near Dadeland',
-            'New art installation in the Design District is 🔥',
-            'Beach cleanup volunteers needed at Key Biscayne',
-            'Metro bus delays on Route 11 this morning',
-            'Free concert at Bayfront Park was incredible!',
-            'Road closure on Flagler Street for emergency repairs',
-            'Miami International Airport security lines are long',
-            'Local business spotlight: amazing Cuban coffee on Calle Ocho',
-            'Community garden project starting in Little Havana',
-            'Bike share stations need more maintenance',
-            'Late night food scene in South Beach is unmatched',
-            'Public wifi down in downtown Miami',
-            'Street art tour in Wynwood was educational and fun'
-        ];
-        
-        const sentiments = ['positive', 'negative', 'neutral'];
-        const platforms = ['Twitter', 'Instagram', 'Facebook', 'TikTok', 'Reddit'];
-        const engagementLevels = ['low', 'medium', 'high'];
-        
-        const posts = [];
-        const postCount = timeframe === '24h' ? 25 : timeframe === '7d' ? 150 : 50;
-        
-        for (let i = 0; i < postCount; i++) {
-            const hoursAgo = Math.floor(Math.random() * (timeframe === '24h' ? 24 : 168));
-            const postDate = new Date();
-            postDate.setHours(postDate.getHours() - hoursAgo);
-            
-            const sentiment = sentiments[Math.floor(Math.random() * sentiments.length)];
-            const platform = platforms[Math.floor(Math.random() * platforms.length)];
-            const engagement = engagementLevels[Math.floor(Math.random() * engagementLevels.length)];
-            
-            posts.push({
-                id: `post-${Date.now()}-${i}`,
-                content: miamiTopics[Math.floor(Math.random() * miamiTopics.length)],
-                platform: platform,
-                sentiment: sentiment,
-                engagement: engagement,
-                likes: Math.floor(Math.random() * (engagement === 'high' ? 500 : engagement === 'medium' ? 100 : 20)),
-                shares: Math.floor(Math.random() * (engagement === 'high' ? 50 : engagement === 'medium' ? 15 : 5)),
-                comments: Math.floor(Math.random() * (engagement === 'high' ? 100 : engagement === 'medium' ? 25 : 8)),
-                timestamp: postDate.toISOString(),
-                location: 'Miami-Dade County, FL',
-                topics: extractTopics(miamiTopics[Math.floor(Math.random() * miamiTopics.length)])
-            });
-        }
-        
-        // Sort by timestamp (newest first)
-        posts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        
-        console.log(`✅ Generated ${posts.length} realistic Miami social media posts`);
-        
-        res.json({
-            success: true,
-            timeframe,
-            posts: posts,
-            count: posts.length,
-            metrics: {
-                totalPosts: posts.length,
-                positiveCount: posts.filter(p => p.sentiment === 'positive').length,
-                negativeCount: posts.filter(p => p.sentiment === 'negative').length,
-                neutralCount: posts.filter(p => p.sentiment === 'neutral').length,
-                avgEngagement: posts.reduce((sum, p) => sum + p.likes + p.shares + p.comments, 0) / posts.length
-            },
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('❌ Error generating social media data:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to generate social media data',
-            message: error.message
-        });
-    }
-});
-
-// Helper function to extract topics from social media content
-function extractTopics(content) {
-    const topicKeywords = {
-        'traffic': ['traffic', 'i-95', 'biscayne', 'flagler', 'delays', 'construction'],
-        'events': ['concert', 'festival', 'game', 'park', 'beach'],
-        'infrastructure': ['parking', 'bike', 'metro', 'bus', 'wifi', 'construction'],
-        'community': ['cleanup', 'volunteers', 'business', 'local', 'neighborhood'],
-        'weather': ['storm', 'flooding', 'sunset', 'beautiful'],
-        'culture': ['art', 'food', 'wynwood', 'south beach', 'little havana']
-    };
-    
-    const topics = [];
-    const lowerContent = content.toLowerCase();
-    
-    for (const [topic, keywords] of Object.entries(topicKeywords)) {
-        if (keywords.some(keyword => lowerContent.includes(keyword))) {
-            topics.push(topic);
-        }
-    }
-    
-    return topics.length > 0 ? topics : ['general'];
-}
-
-// Secure API key endpoint (only returns key, not exposed in frontend code)
-app.get('/api/config/windy-key', (req, res) => {
-    res.json({
-        apiKey: process.env.WINDY_API_KEY || null
     });
 });
 
@@ -660,256 +437,6 @@ async function getTrafficData(timeframe = '24h') {
         };
     });
 }
-
-// Weather API endpoints
-app.get('/api/weather/current', async (req, res) => {
-    try {
-        const apiKey = process.env.OPENWEATHER_API_KEY;
-        if (!apiKey) {
-            throw new Error('OpenWeather API key not configured');
-        }
-        
-        const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?q=Miami,FL,US&appid=${apiKey}&units=imperial`
-        );
-        
-        if (!response.ok) {
-            throw new Error(`Weather API error: ${response.status}`);
-        }
-        
-        const weatherData = await response.json();
-        
-        res.json({
-            success: true,
-            location: "Miami, FL",
-            temperature: Math.round(weatherData.main.temp),
-            description: weatherData.weather[0].description,
-            humidity: weatherData.main.humidity,
-            windSpeed: weatherData.wind.speed,
-            icon: weatherData.weather[0].icon,
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        console.error('❌ Weather API error:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Weather service unavailable - API key required',
-            message: error.message 
-        });
-    }
-});
-
-app.get('/api/weather/forecast', async (req, res) => {
-    try {
-        const apiKey = process.env.OPENWEATHER_API_KEY;
-        if (!apiKey) {
-            throw new Error('OpenWeather API key not configured');
-        }
-        
-        const url = `https://api.openweathermap.org/data/2.5/forecast?q=Miami,FL,US&appid=${apiKey}&units=imperial`;
-        
-        console.log('🌤️ Fetching 5-day weather forecast from OpenWeatherMap...');
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`OpenWeather forecast API error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Process forecast data - group by day and get daily highs/lows
-        const dailyForecasts = {};
-        
-        data.list.forEach(item => {
-            const date = new Date(item.dt * 1000).toISOString().split('T')[0];
-            
-            if (!dailyForecasts[date]) {
-                dailyForecasts[date] = {
-                    date: date,
-                    temps: [],
-                    descriptions: [],
-                    icons: [],
-                    humidity: []
-                };
-            }
-            
-            dailyForecasts[date].temps.push(item.main.temp);
-            dailyForecasts[date].descriptions.push(item.weather[0].description);
-            dailyForecasts[date].icons.push(item.weather[0].icon);
-            dailyForecasts[date].humidity.push(item.main.humidity);
-        });
-        
-        // Convert to final forecast format
-        const forecast = Object.values(dailyForecasts).slice(0, 5).map(day => ({
-            date: day.date,
-            high: Math.round(Math.max(...day.temps)),
-            low: Math.round(Math.min(...day.temps)),
-            description: day.descriptions[0], // Use first description of the day
-            humidity: Math.round(day.humidity.reduce((a, b) => a + b, 0) / day.humidity.length),
-            icon: day.icons[0] // Use first icon of the day
-        }));
-        
-        console.log('✅ Weather forecast data fetched successfully');
-        
-        res.json({ 
-            success: true, 
-            forecast: forecast,
-            count: forecast.length 
-        });
-        
-    } catch (error) {
-        console.error('❌ Forecast API error:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Forecast service unavailable - API key required',
-            forecast: [],
-            message: error.message
-        });
-    }
-});
-
-// AI Analysis endpoint - REAL GPT-4o-mini ANALYSIS
-app.post('/api/ai/analyze', async (req, res) => {
-    try {
-        const { type, data } = req.body;
-        console.log(`🤖 REAL AI Analysis requested for: ${type} (${data.length} data points)`);
-        
-        if (!process.env.OPENAI_API_KEY) {
-            throw new Error('OpenAI API key not configured');
-        }
-        
-        // Prepare data summary for AI analysis
-        const dataSummary = data.slice(0, 50).map(item => ({
-            type: item.type,
-            location: item.address || item.location,
-            date: item.date,
-            status: item.status,
-            priority: item.priority
-        }));
-        
-        let prompt = '';
-        switch (type) {
-            case 'crime':
-                prompt = `Analyze this Miami-Dade crime/safety data and provide actionable insights:
-                
-Data: ${JSON.stringify(dataSummary, null, 2)}
-
-Provide analysis in JSON format with:
-- summary: Brief overview of threat level and key findings
-- trends: Array of specific crime trends with type, trend direction, and percentage change
-- recommendations: Array of specific actionable recommendations for law enforcement
-- hotspots: Areas requiring immediate attention`;
-                break;
-                
-            case 'traffic':
-                prompt = `Analyze this Miami-Dade traffic incident data and provide insights:
-                
-Data: ${JSON.stringify(dataSummary, null, 2)}
-
-Provide analysis in JSON format with:
-- summary: Overall traffic flow assessment
-- routes: Specific route conditions with status and estimated delays
-- recommendations: Traffic management recommendations
-- patterns: Time-based traffic patterns identified`;
-                break;
-                
-            case 'social':
-                prompt = `Analyze this social media sentiment data for Miami-Dade and provide insights:
-                
-Data: ${JSON.stringify(dataSummary, null, 2)}
-
-Provide analysis in JSON format with:
-- sentiment: Overall sentiment assessment
-- themes: Key topics being discussed
-- concerns: Main community concerns identified
-- engagement: Community engagement patterns`;
-                break;
-                
-            default:
-                return res.status(400).json({ error: 'Invalid analysis type' });
-        }
-        
-        // Call OpenAI GPT-4o-mini
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an expert data analyst specializing in public safety and urban analytics for Miami-Dade County. Provide precise, actionable insights based on real data. Always return valid JSON format."
-                },
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
-            temperature: 0.3,
-            max_tokens: 1000
-        });
-        
-        const aiResponse = completion.choices[0].message.content;
-        let analysis;
-        
-        try {
-            analysis = JSON.parse(aiResponse);
-        } catch (parseError) {
-            console.error('❌ Failed to parse AI response as JSON:', parseError);
-            // Fallback structured response
-            analysis = {
-                summary: aiResponse.substring(0, 200),
-                error: 'AI response format issue',
-                rawResponse: aiResponse
-            };
-        }
-        
-        console.log(`✅ REAL AI Analysis completed for ${type}`);
-        res.json({ 
-            success: true, 
-            type, 
-            analysis, 
-            dataPoints: data.length,
-            model: "gpt-4o-mini",
-            timestamp: new Date().toISOString() 
-        });
-        
-    } catch (error) {
-        console.error('❌ REAL AI Analysis error:', error);
-        res.status(500).json({ 
-            error: 'AI analysis service unavailable',
-            details: error.message,
-            fallback: false
-        });
-    }
-});
-
-// Trends endpoint
-app.get('/api/trends/:metric', async (req, res) => {
-    try {
-        const { metric } = req.params;
-        const days = parseInt(req.query.days) || 30;
-        
-        console.log(`📈 Fetching trends for: ${metric} (${days} days)`);
-        
-        // Generate mock trend data
-        const trendData = [];
-        for (let i = days; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            
-            trendData.push({
-                date: date.toISOString().split('T')[0],
-                value: Math.floor(Math.random() * 50) + 10,
-                metric: metric
-            });
-        }
-        
-        res.json({ success: true, metric, days, data: trendData });
-        
-    } catch (error) {
-        console.error('❌ Trends API error:', error);
-        res.status(500).json({ error: 'Trends service unavailable' });
-    }
-});
 
 // API Routes
 app.get('/api/dashboard/:timeframe', async (req, res) => {

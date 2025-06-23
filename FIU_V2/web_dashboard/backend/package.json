@@ -1,0 +1,29 @@
+{
+  "name": "localpulse-api-server",
+  "version": "1.0.0",
+  "description": "Real API server for LocalPulse dashboard with Miami-Dade data integration",
+  "main": "real-api-server.js",
+  "scripts": {
+    "start": "node real-api-server.js",
+    "dev": "nodemon real-api-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "localpulse",
+    "dashboard",
+    "security",
+    "configuration"
+  ],
+  "author": "LocalPulse Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+} 

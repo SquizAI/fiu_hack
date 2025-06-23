@@ -1,0 +1,344 @@
+# LocalPulse .gitignore
+
+# =============================================================================
+# ENVIRONMENT & SECRETS
+# =============================================================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# API Keys and Secrets
+config/secrets.json
+secrets/
+api_keys.txt
+
+# =============================================================================
+# PYTHON
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# =============================================================================
+# STREAMLIT
+# =============================================================================
+.streamlit/
+.streamlit/secrets.toml
+
+# =============================================================================
+# DATA & DATABASES
+# =============================================================================
+*.db
+*.sqlite
+*.sqlite3
+data/logs/
+data/cache/
+data/temp/
+data/detection_logs/
+*.csv.backup
+*.json.backup
+
+# Large datasets
+data/raw/
+data/processed/large_*
+*.parquet
+
+# Database dumps
+*.sql
+*.dump
+
+# =============================================================================
+# MACHINE LEARNING & AI
+# =============================================================================
+# Model files
+*.pt
+*.pth
+*.onnx
+*.pb
+*.h5
+*.pkl
+*.joblib
+models/
+weights/
+checkpoints/
+
+# Training outputs
+runs/
+logs/
+tensorboard/
+wandb/
+
+# YOLOv8 specific
+yolov8*.pt
+ultralytics/
+
+# =============================================================================
+# LOGS & MONITORING
+# =============================================================================
+*.log
+logs/
+log/
+*.log.*
+*.out
+*.err
+
+# =============================================================================
+# TEMPORARY FILES
+# =============================================================================
+*.tmp
+*.temp
+temp/
+tmp/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =============================================================================
+# MEDIA FILES
+# =============================================================================
+# Large media files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.flv
+
+# Image caches
+*.cache
+image_cache/
+video_cache/
+
+# =============================================================================
+# IDE & EDITORS
+# =============================================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# NODE.JS (if using any JS components)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# =============================================================================
+# DOCKER
+# =============================================================================
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# =============================================================================
+# CLOUD & DEPLOYMENT
+# =============================================================================
+# AWS
+.aws/
+aws-exports.js
+
+# Google Cloud
+.gcloud/
+gcloud-service-key.json
+
+# Heroku
+.heroku/
+
+# Vercel
+.vercel
+
+# =============================================================================
+# BACKUP & ARCHIVE FILES
+# =============================================================================
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+*.tar
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# =============================================================================
+# CONFIGURATION FILES (with sensitive data)
+# =============================================================================
+config.ini
+config.yaml
+config.yml
+settings.json
+local_settings.py
+
+# =============================================================================
+# TESTING
+# =============================================================================
+.coverage
+.pytest_cache/
+test_reports/
+coverage_reports/
+
+# =============================================================================
+# DOCUMENTATION BUILD
+# =============================================================================
+docs/_build/
+docs/build/
+site/
+
+# =============================================================================
+# CUSTOM LOCALPULSE SPECIFIC
+# =============================================================================
+# Camera streams and recordings
+streams/
+recordings/
+camera_data/
+
+# User uploads
+uploads/
+user_content/
+
+# Generated reports
+reports/generated/
+exports/
+
+# Cache directories
+.cache/
+cache/
+
+# Session data
+sessions/
+.sessions/
+
+# Performance monitoring
+performance_logs/
+metrics/
+
+# Development utilities
+dev_tools/
+debug_output/

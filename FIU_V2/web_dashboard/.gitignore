@@ -1,0 +1,109 @@
+# LocalPulse Web Dashboard - Git Ignore File
+
+# ===========================================
+# API CONFIGURATION (SENSITIVE)
+# ===========================================
+# Never commit actual API keys to version control
+config.js
+.env
+.env.local
+.env.production
+
+# Backend environment files
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# ===========================================
+# DEVELOPMENT FILES
+# ===========================================
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===========================================
+# LOGS AND TEMPORARY FILES
+# ===========================================
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ===========================================
+# DEPENDENCIES (if using npm/node)
+# ===========================================
+# Node modules
+node_modules/
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# ===========================================
+# BUILD AND DISTRIBUTION
+# ===========================================
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+
+# ===========================================
+# BACKUP AND TEMPORARY FILES
+# ===========================================
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# ===========================================
+# LOCAL DEVELOPMENT
+# ===========================================
+# Local development server files
+.cache/
+.parcel-cache/
+
+# ===========================================
+# ANALYTICS AND TRACKING
+# ===========================================
+# Analytics data
+analytics/
+metrics/
+logs/
+
+# ===========================================
+# SECURITY AND CERTIFICATES
+# ===========================================
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# ===========================================
+# DOCUMENTATION DRAFTS
+# ===========================================
+# Draft documentation
+drafts/
+notes/
+TODO.md
+NOTES.md 

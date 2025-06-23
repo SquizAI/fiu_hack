@@ -4,14 +4,10 @@
 class SecureConfigLoader {
     constructor() {
         this.config = null;
-        // Auto-detect environment
-        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const baseUrl = isDevelopment ? 'http://localhost:8080' : window.location.origin;
-        
-        this.configEndpoint = `${baseUrl}/api/config`;
-        this.healthEndpoint = `${baseUrl}/api/dashboard/24h`;
-        this.aiEndpoint = `${baseUrl}/api/ai/analyze`;
-        this.weatherEndpoint = `${baseUrl}/api/weather`;
+        this.configEndpoint = 'http://localhost:8080/api/config';
+        this.healthEndpoint = 'http://localhost:8080/api/dashboard/24h';
+        this.aiEndpoint = 'http://localhost:8080/api/ai/analyze';
+        this.weatherEndpoint = 'http://localhost:8080/api/weather';
     }
 
     async loadConfiguration() {
@@ -24,7 +20,7 @@ class SecureConfigLoader {
         // Minimal fallback configuration for offline mode
         this.config = {
             mapbox: {
-                accessToken: 'YOUR_MAPBOX_TOKEN_HERE', // Your actual Mapbox token
+                accessToken: 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA', // Your actual Mapbox token
                 endpoints: {
                     geocoding: 'https://api.mapbox.com/geocoding/v5/mapbox.places',
                     directions: 'https://api.mapbox.com/directions/v5/mapbox/driving'

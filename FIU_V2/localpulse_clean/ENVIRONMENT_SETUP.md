@@ -12,7 +12,7 @@
 - **Used for**: Current weather + 5-day forecast for Miami
 
 ### 2. Windy API Key (Already Configured)
-- ✅ **Already set**: `5jVQqxUM3iRPuBsAXVG8PtE0ORCktGCf`
+- ✅ **Already set**: `YOUR_WINDY_API_KEY_HERE`
 - **Used for**: Interactive weather maps and overlays
 
 ## 🔧 Local Development Setup
@@ -29,7 +29,7 @@ Create `.env` file:
 NODE_ENV=development
 PORT=8080
 OPENWEATHER_API_KEY=your_actual_api_key_here
-WINDY_API_KEY=5jVQqxUM3iRPuBsAXVG8PtE0ORCktGCf
+WINDY_API_KEY=YOUR_WINDY_API_KEY_HERE
 CORS_ORIGIN=*
 ```
 
