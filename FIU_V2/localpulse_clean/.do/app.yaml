@@ -14,34 +14,16 @@ services:
   http_port: 8080
   routes:
   - path: /api
+  - path: /
   envs:
   - key: NODE_ENV
     value: production
   - key: PORT
     value: "8080"
-  - key: OPENWEATHER_API_KEY
-    value: "get_your_free_api_key_from_openweathermap.org"
-    type: SECRET
   - key: WINDY_API_KEY
     value: "5jVQqxUM3iRPuBsAXVG8PtE0ORCktGCf"
     type: SECRET
   - key: CORS_ORIGIN
     value: "*"
-
-static_sites:
-- name: frontend
-  source_dir: /FIU_V2/localpulse_clean
-  github:
-    repo: SquizAI/fiu_hack
-    branch: main
-  build_command: echo "No build needed for static files"
-  output_dir: /
-  index_document: index.html
-  error_document: index.html
-  routes:
-  - path: /
-  envs:
-  - key: API_BASE_URL
-    value: ${backend.PRIVATE_URL}
 
 # Domains will be auto-assigned by DigitalOcean 
