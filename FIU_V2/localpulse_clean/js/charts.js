@@ -339,7 +339,14 @@ class ChartManager {
 
     resizeCharts() {
         Object.values(this.charts).forEach(chart => {
-            chart.resize();
+            // Check if chart canvas still exists in DOM before resizing
+            if (chart && chart.canvas && chart.canvas.parentNode) {
+                try {
+                    chart.resize();
+                } catch (error) {
+                    console.warn('Chart resize failed:', error);
+                }
+            }
         });
     }
 }
