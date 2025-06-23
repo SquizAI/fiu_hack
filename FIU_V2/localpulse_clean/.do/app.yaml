@@ -28,6 +28,9 @@ services:
   - key: MAPBOX_PUBLIC_TOKEN
     value: "pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA"
     type: SECRET
+  - key: OPENAI_API_KEY
+    value: "YOUR_OPENAI_API_KEY_HERE"
+    type: SECRET
   - key: CORS_ORIGIN
     value: "*"
 
