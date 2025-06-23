@@ -7,7 +7,7 @@ services:
   github:
     repo: SquizAI/fiu_hack
     branch: main
-  run_command: npm start
+  run_command: node server.js
   environment_slug: node-js
   instance_count: 1
   instance_size_slug: basic-xxs
