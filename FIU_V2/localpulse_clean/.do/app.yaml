@@ -20,7 +20,13 @@ services:
   - key: PORT
     value: "8080"
   - key: WINDY_API_KEY
-    value: "5jVQqxUM3iRPuBsAXVG8PtE0ORCktGCf"
+    value: "YOUR_WINDY_API_KEY_HERE"
+    type: SECRET
+  - key: OPENAI_API_KEY
+    value: "YOUR_OPENAI_API_KEY_HERE"
+    type: SECRET
+  - key: MAPBOX_PUBLIC_TOKEN
+    value: "YOUR_MAPBOX_TOKEN_HERE"
     type: SECRET
   - key: CORS_ORIGIN
     value: "*"
