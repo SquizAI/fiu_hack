@@ -13,7 +13,6 @@ services:
   instance_size_slug: basic-xxs
   http_port: 8080
   routes:
-  - path: /api
   - path: /
   envs:
   - key: NODE_ENV
