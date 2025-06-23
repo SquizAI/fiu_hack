@@ -372,10 +372,16 @@ function extractTopics(content) {
     return topics.length > 0 ? topics : ['general'];
 }
 
-// Secure API key endpoint (only returns key, not exposed in frontend code)
+// Secure API key endpoints (only returns keys, not exposed in frontend code)
 app.get('/api/config/windy-key', (req, res) => {
     res.json({
         apiKey: process.env.WINDY_API_KEY || null
+    });
+});
+
+app.get('/api/config/mapbox-token', (req, res) => {
+    res.json({
+        accessToken: process.env.MAPBOX_PUBLIC_TOKEN || null
     });
 });
 

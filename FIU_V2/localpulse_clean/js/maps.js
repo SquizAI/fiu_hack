@@ -2,7 +2,7 @@
 class MapManager {
     constructor() {
         // Get Mapbox token from configuration
-        this.mapboxToken = this.getMapboxToken();
+        this.mapboxToken = null; // Will be set async
         this.maps = {};
         this.coralGablesCenter = [-80.268, 25.721];
         this.apiIntegration = null;
@@ -15,16 +15,29 @@ class MapManager {
         }
     }
 
-    getMapboxToken() {
-        // Try to get token from configuration
+    async getMapboxToken() {
+        try {
+            // Get token from server (secure)
+            const response = await fetch('/api/config/mapbox-token');
+            const config = await response.json();
+            
+            if (config.accessToken && config.accessToken !== 'YOUR_MAPBOX_TOKEN_HERE') {
+                console.log('✅ Using Mapbox token from server');
+                return config.accessToken;
+            }
+        } catch (error) {
+            console.warn('⚠️ Could not get Mapbox token from server:', error);
+        }
+        
+        // Try to get token from configuration as fallback
         if (window.LocalPulseConfig && window.LocalPulseConfig.mapbox && window.LocalPulseConfig.mapbox.accessToken) {
             console.log('✅ Using Mapbox token from secure configuration');
             return window.LocalPulseConfig.mapbox.accessToken;
         }
         
-        // Fallback to your actual token if configuration fails
-        console.warn('⚠️ Using fallback Mapbox token');
-        return 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA';
+        // Final fallback - this will cause 401 errors but won't expose real tokens
+        console.warn('⚠️ Mapbox token not configured - maps will not work');
+        return 'YOUR_MAPBOX_TOKEN_HERE';
     }
 
     initializeMainMap() {
@@ -1262,7 +1275,7 @@ class MapManager {
 let mapManager;
 
 // Initialize maps function called from app.js
-function initializeMaps() {
+async function initializeMaps() {
     // Wait for configuration to be available
     if (!window.LocalPulseConfig) {
         console.log('⏳ Waiting for configuration before initializing maps...');
@@ -1272,6 +1285,8 @@ function initializeMaps() {
 
     if (!mapManager) {
         mapManager = new MapManager();
+        // Get token asynchronously
+        mapManager.mapboxToken = await mapManager.getMapboxToken();
     }
 
     // Initialize main dashboard map
