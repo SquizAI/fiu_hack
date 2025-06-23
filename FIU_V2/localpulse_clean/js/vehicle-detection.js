@@ -17,22 +17,22 @@ class VehicleDetectionManager {
         this.trafficCameras = [
             {
                 name: "I-95 at NW 79th St (Live Feed)",
-                imageUrl: "http://localhost:8080/api/camera-image/95-079",
+                imageUrl: "/api/camera-image/95-079",
                 type: "image"
             },
             {
                 name: "I-95 at NW 95th St (Live Feed)", 
-                imageUrl: "http://localhost:8080/api/camera-image/95-095",
+                imageUrl: "/api/camera-image/95-095",
                 type: "image"
             },
             {
                 name: "US-1 at SW 8th St (Live Feed)",
-                imageUrl: "http://localhost:8080/api/camera-image/US1-008",
+                imageUrl: "/api/camera-image/US1-008",
                 type: "image"
             },
             {
                 name: "I-95 at NW 103rd St (Live Feed)",
-                imageUrl: "http://localhost:8080/api/camera-image/95-103",
+                imageUrl: "/api/camera-image/95-103",
                 type: "image"
             },
             {

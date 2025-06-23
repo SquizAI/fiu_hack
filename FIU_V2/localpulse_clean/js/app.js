@@ -282,7 +282,7 @@ class LocalPulseDashboard {
         
         try {
             // Fetch view-specific data from API server
-            const response = await fetch(`http://localhost:8080/api/dashboard/view/${view}`);
+            const response = await fetch(`/api/dashboard/view/${view}`);
             const result = await response.json();
             
             if (result.success) {
@@ -317,7 +317,7 @@ class LocalPulseDashboard {
         
         try {
             // Fetch trend data from API server
-            const response = await fetch(`http://localhost:8080/api/trends/${metric}?days=30`);
+            const response = await fetch(`/api/trends/${metric}?days=30`);
             const result = await response.json();
             
             if (result.success) {
@@ -855,7 +855,7 @@ class LocalPulseDashboard {
         
         try {
             // Fetch real traffic data from the consolidated server
-            const response = await fetch('http://localhost:8080/api/dashboard/24h');
+            const response = await fetch('/api/dashboard/24h');
             const dashboardData = await response.json();
             
             const trafficData = dashboardData?.traffic || [];
@@ -1090,63 +1090,69 @@ class LocalPulseDashboard {
     }
 
     updateTrafficChart(trafficData) {
-        // Use the chart manager instead of creating charts directly
-        if (typeof chartManager !== 'undefined' && chartManager) {
-            // Destroy existing traffic chart
-            chartManager.destroyChart('traffic');
+        const ctx = document.getElementById('traffic-chart');
+        if (!ctx) return;
+        
+        // PROPERLY destroy existing chart using Chart.js official method
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        // Also destroy any stored chart instance
+        if (window.trafficChartInstance) {
+            window.trafficChartInstance.destroy();
+            window.trafficChartInstance = null;
+        }
             
-            const ctx = document.getElementById('traffic-chart');
-            if (!ctx) return;
-            
-            // Count incidents by severity
-            const severityCounts = {
-                'LOW': 0,
-                'MEDIUM': 0,
-                'HIGH': 0
-            };
-            
-            trafficData.forEach(incident => {
-                const severity = incident.severity || 'LOW';
-                if (severityCounts.hasOwnProperty(severity)) {
-                    severityCounts[severity]++;
-                }
-            });
-            
-            // Create new chart through chart manager
-            chartManager.charts.traffic = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(severityCounts),
-                    datasets: [{
-                        label: 'Traffic Incidents',
-                        data: Object.values(severityCounts),
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                        borderColor: ['#20bf6b', '#f39c12', '#e74c3c'],
-                        borderWidth: 1
-                    }]
+        // Count incidents by severity
+        const severityCounts = {
+            'LOW': 0,
+            'MEDIUM': 0,
+            'HIGH': 0
+        };
+        
+        trafficData.forEach(incident => {
+            const severity = incident.severity || 'LOW';
+            if (severityCounts.hasOwnProperty(severity)) {
+                severityCounts[severity]++;
+            }
+        });
+        
+        // Create new chart and store reference
+        window.trafficChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(severityCounts),
+                datasets: [{
+                    label: 'Traffic Incidents',
+                    data: Object.values(severityCounts),
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                    borderColor: ['#20bf6b', '#f39c12', '#e74c3c'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Traffic Incidents by Severity'
+                    }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Traffic Incidents by Severity'
-                        }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Number of Incidents'
-                            }
+                            text: 'Number of Incidents'
                         }
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     async loadSocialData() {
@@ -1305,7 +1311,7 @@ class LocalPulseDashboard {
     async loadCurrentWeather() {
         try {
             // Use OpenWeatherMap for current conditions
-            const response = await fetch(`http://localhost:8080/api/weather/current`);
+            const response = await fetch(`/api/weather/current`);
             
             if (response.ok) {
                 const weatherData = await response.json();
@@ -1332,7 +1338,7 @@ class LocalPulseDashboard {
 
     async loadWeatherForecast() {
         try {
-            const response = await fetch(`http://localhost:8080/api/weather/forecast`);
+            const response = await fetch(`/api/weather/forecast`);
             
             if (response.ok) {
                 const result = await response.json();
@@ -1643,15 +1649,18 @@ class LocalPulseDashboard {
             // Get real crime data first
             const crimeData = await this.apiIntegration.fetchRealCrimeData();
             
+            // LIMIT DATA SIZE to prevent 413 Payload Too Large error
+            const limitedData = (crimeData || []).slice(0, 50); // Only send first 50 records
+            
             // Call the real API server for AI analysis
-            const response = await fetch('http://localhost:8080/api/ai/analyze', {
+            const response = await fetch('/api/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     type: 'crime',
-                    data: crimeData || []
+                    data: limitedData
                 })
             });
             
@@ -1677,15 +1686,18 @@ class LocalPulseDashboard {
             // Get real traffic data first
             const trafficData = await this.apiIntegration.fetchRealTrafficData();
             
+            // LIMIT DATA SIZE to prevent 413 Payload Too Large error
+            const limitedData = (trafficData || []).slice(0, 50); // Only send first 50 records
+            
             // Call the real API server for AI analysis
-            const response = await fetch('http://localhost:8080/api/ai/analyze', {
+            const response = await fetch('/api/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     type: 'traffic',
-                    data: trafficData || []
+                    data: limitedData
                 })
             });
             
@@ -1712,7 +1724,7 @@ class LocalPulseDashboard {
             const socialData = []; // No sample data
             
             // Call the real API server for AI analysis
-            const response = await fetch('http://localhost:8080/api/ai/analyze', {
+            const response = await fetch('/api/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -108,7 +108,7 @@ app.get('/api/cameras/list', (req, res) => {
             name: cameraNames[index] || `Camera ${index + 1}`,
             url: url,
             type: url.includes('.m3u8') ? 'hls' : 'mp4',
-            proxyUrl: `http://localhost:8080/api/proxy/url_${index}/${url.split('/').pop()}`
+                            proxyUrl: `/api/proxy/url_${index}/${url.split('/').pop()}`
         }))
     });
 });
@@ -161,7 +161,7 @@ app.get('/api/proxy/url_:urlIndex/:filename', async (req, res) => {
             
             // Replace relative URLs with proxy URLs
             const modifiedText = text.replace(/^(?!https?:\/\/)([^\s\n]+\.m3u8)/gm, (match) => {
-                return `http://localhost:8080/api/proxy/url_${cameraIndex}/${match}`;
+                return `/api/proxy/url_${cameraIndex}/${match}`;
             });
             
             res.send(modifiedText);
