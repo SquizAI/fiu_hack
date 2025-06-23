@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Stream Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        video { width: 100%; max-width: 800px; height: 450px; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { margin: 5px; padding: 10px 15px; }
+    </style>
+</head>
+<body>
+    <h1>🎥 LocalPulse Video Stream Test</h1>
+    
+    <div id="status" class="status">Ready to test...</div>
+    
+    <video id="video" controls autoplay muted></video>
+    
+    <div style="margin: 20px 0;">
+        <button onclick="testStream(0)">🎬 Test Stream (MUX)</button>
+        <button onclick="testStream(1)">🎭 Sintel Movie</button>
+        <button onclick="testStream(2)">🐰 Big Buck Bunny</button>
+    </div>
+    
+    <div id="logs" style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+
+    <script>
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+        const logs = document.getElementById('logs');
+        
+        function log(message) {
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${time}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        function updateStatus(message, isError = false) {
+            status.textContent = message;
+            status.className = `status ${isError ? 'error' : 'success'}`;
+            log(message);
+        }
+        
+        function testStream(cameraIndex) {
+            const proxyUrl = `http://localhost:8080/api/proxy/url_${cameraIndex}/`;
+            const urls = [
+                'x36xhzz.m3u8',
+                'playlist.m3u8', 
+                'master.m3u8'
+            ];
+            
+            const testUrl = proxyUrl + urls[cameraIndex];
+            
+            updateStatus(`Testing camera ${cameraIndex}: ${testUrl}`);
+            
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    updateStatus(`✅ Stream ${cameraIndex} loaded successfully!`);
+                    video.play().catch(e => log(`Autoplay prevented: ${e.message}`));
+                });
+                
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    updateStatus(`❌ Stream ${cameraIndex} failed: ${data.details}`, true);
+                });
+                
+                hls.loadSource(testUrl);
+                hls.attachMedia(video);
+                
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = testUrl;
+                video.addEventListener('loadeddata', () => {
+                    updateStatus(`✅ Stream ${cameraIndex} loaded (Safari native)`);
+                });
+                video.addEventListener('error', () => {
+                    updateStatus(`❌ Stream ${cameraIndex} failed (Safari native)`, true);
+                });
+            } else {
+                updateStatus('❌ HLS not supported in this browser', true);
+            }
+        }
+        
+        // Auto-test first stream
+        setTimeout(() => testStream(0), 1000);
+    </script>
+</body>
+</html> 

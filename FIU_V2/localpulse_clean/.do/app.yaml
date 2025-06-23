@@ -1,0 +1,47 @@
+name: localpulse-dashboard
+region: nyc
+
+services:
+- name: backend
+  source_dir: /FIU_V2/localpulse_clean
+  github:
+    repo: SquizAI/fiu_hack
+    branch: main
+  run_command: npm start
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 8080
+  routes:
+  - path: /api
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "8080"
+  - key: OPENWEATHER_API_KEY
+    value: your_openweather_api_key_here
+    type: SECRET
+  - key: CORS_ORIGIN
+    value: ${APP_DOMAIN}
+    type: SECRET
+
+static_sites:
+- name: frontend
+  source_dir: /FIU_V2/localpulse_clean
+  github:
+    repo: SquizAI/fiu_hack
+    branch: main
+  build_command: echo "No build needed for static files"
+  output_dir: /
+  index_document: index.html
+  error_document: index.html
+  routes:
+  - path: /
+  envs:
+  - key: API_BASE_URL
+    value: ${backend.PRIVATE_URL}
+
+domains:
+- domain: localpulse-dashboard.ondigitalocean.app
+  type: PRIMARY 
