@@ -3,7 +3,7 @@ region: nyc
 
 services:
 - name: backend
-  source_dir: /FIU_V2/localpulse_clean
+  source_dir: FIU_V2/localpulse_clean
   github:
     repo: SquizAI/fiu_hack
     branch: main
