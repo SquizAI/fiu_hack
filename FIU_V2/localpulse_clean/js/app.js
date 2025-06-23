@@ -240,7 +240,7 @@ class LocalPulseDashboard {
         
         try {
             // Fetch real data from the new API server
-            const response = await fetch(`http://localhost:8080/api/dashboard/${timeframe}`);
+            const response = await fetch(`/api/dashboard/${timeframe}`);
             const result = await response.json();
             
             if (result.success) {
