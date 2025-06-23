@@ -20,11 +20,13 @@ services:
   - key: PORT
     value: "8080"
   - key: OPENWEATHER_API_KEY
-    value: your_openweather_api_key_here
+    value: "get_your_free_api_key_from_openweathermap.org"
+    type: SECRET
+  - key: WINDY_API_KEY
+    value: "5jVQqxUM3iRPuBsAXVG8PtE0ORCktGCf"
     type: SECRET
   - key: CORS_ORIGIN
-    value: ${APP_DOMAIN}
-    type: SECRET
+    value: "*"
 
 static_sites:
 - name: frontend
