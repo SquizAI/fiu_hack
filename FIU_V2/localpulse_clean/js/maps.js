@@ -38,9 +38,9 @@ class MapManager {
             return window.LocalPulseConfig.mapbox.accessToken;
         }
         
-        // Use hardcoded fallback as last resort
-        console.warn('⚠️ Using hardcoded fallback token');
-        return 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA';
+        // Final fallback - this will cause 401 errors but won't expose real tokens
+        console.warn('⚠️ Mapbox token not configured - maps will not work');
+        return null;
     }
 
     initializeMainMap() {
@@ -49,7 +49,12 @@ class MapManager {
             return;
         }
 
-        console.log('🗺️ Setting Mapbox access token:', this.mapboxToken ? this.mapboxToken.substring(0, 20) + '...' : 'MISSING');
+        if (!this.mapboxToken) {
+            console.error('❌ No Mapbox token available - cannot initialize map');
+            return;
+        }
+        
+        console.log('🗺️ Setting Mapbox access token:', this.mapboxToken.substring(0, 20) + '...');
         mapboxgl.accessToken = this.mapboxToken;
 
         // Clear any existing map instance

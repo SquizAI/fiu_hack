@@ -81,7 +81,7 @@ class SecureConfigLoader {
         // Minimal fallback configuration for offline mode
         this.config = {
             mapbox: {
-                accessToken: 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA', // Your actual Mapbox token as fallback
+                accessToken: null, // Token will be fetched from server
                 endpoints: {
                     geocoding: 'https://api.mapbox.com/geocoding/v5/mapbox.places',
                     directions: 'https://api.mapbox.com/directions/v5/mapbox/driving'
