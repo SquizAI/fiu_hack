@@ -17,12 +17,15 @@ class MapManager {
 
     async getMapboxToken() {
         try {
+            console.log('🔑 Fetching Mapbox token from server...');
             // Get token from server (secure)
             const response = await fetch('/api/config/mapbox-token');
             const config = await response.json();
             
+            console.log('🔑 Server response:', config);
+            
             if (config.accessToken && config.accessToken !== 'YOUR_MAPBOX_TOKEN_HERE') {
-                console.log('✅ Using Mapbox token from server');
+                console.log('✅ Using Mapbox token from server:', config.accessToken.substring(0, 20) + '...');
                 return config.accessToken;
             }
         } catch (error) {
@@ -35,9 +38,9 @@ class MapManager {
             return window.LocalPulseConfig.mapbox.accessToken;
         }
         
-        // Final fallback - this will cause 401 errors but won't expose real tokens
-        console.warn('⚠️ Mapbox token not configured - maps will not work');
-        return 'YOUR_MAPBOX_TOKEN_HERE';
+        // Use hardcoded fallback as last resort
+        console.warn('⚠️ Using hardcoded fallback token');
+        return 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA';
     }
 
     initializeMainMap() {
@@ -46,6 +49,7 @@ class MapManager {
             return;
         }
 
+        console.log('🗺️ Setting Mapbox access token:', this.mapboxToken ? this.mapboxToken.substring(0, 20) + '...' : 'MISSING');
         mapboxgl.accessToken = this.mapboxToken;
 
         // Clear any existing map instance
@@ -1285,8 +1289,14 @@ async function initializeMaps() {
 
     if (!mapManager) {
         mapManager = new MapManager();
-        // Get token asynchronously
+        // Get token asynchronously and ensure it's set
+        console.log('🔑 Getting Mapbox token for map initialization...');
         mapManager.mapboxToken = await mapManager.getMapboxToken();
+        console.log('🔑 Token retrieved:', mapManager.mapboxToken ? mapManager.mapboxToken.substring(0, 20) + '...' : 'FAILED');
+        
+        if (!mapManager.mapboxToken || mapManager.mapboxToken === 'YOUR_MAPBOX_TOKEN_HERE') {
+            console.error('❌ Failed to get valid Mapbox token, maps will not work');
+        }
     }
 
     // Initialize main dashboard map
