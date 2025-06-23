@@ -1329,26 +1329,39 @@ class LocalPulseDashboard {
             const response = await fetch(`http://localhost:8080/api/weather/forecast`);
             
             if (response.ok) {
-                const forecastData = await response.json();
+                const result = await response.json();
                 
-                // Display 5-day forecast
-                const forecastHtml = forecastData.map(day => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="fw-bold">${day.day}</div>
-                        <div class="text-end">
-                            <div>${day.high}°/${day.low}°</div>
-                            <small class="text-muted">${day.condition}</small>
-                        </div>
-                    </div>
-                `).join('');
-                
-                document.getElementById('weather-forecast').innerHTML = forecastHtml;
-                
-                console.log('✅ Weather forecast loaded');
+                if (result.success && result.forecast && Array.isArray(result.forecast)) {
+                    // Display 5-day forecast
+                    const forecastHtml = result.forecast.map(day => {
+                        const date = new Date(day.date);
+                        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                        
+                        return `
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="fw-bold">${dayName}</div>
+                                <div class="text-end">
+                                    <div>${day.high}°/${day.low}°</div>
+                                    <small class="text-muted">${day.description}</small>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    document.getElementById('weather-forecast').innerHTML = forecastHtml;
+                    console.log('✅ Weather forecast loaded from OpenWeatherMap');
+                } else {
+                    throw new Error('Invalid forecast data format');
+                }
+            } else {
+                throw new Error(`API error: ${response.status}`);
             }
         } catch (error) {
             console.error('❌ Failed to load weather forecast:', error);
-            document.getElementById('weather-forecast').innerHTML = '<div class="text-muted">Forecast unavailable</div>';
+            const forecastElement = document.getElementById('weather-forecast');
+            if (forecastElement) {
+                forecastElement.innerHTML = '<div class="text-muted">Forecast unavailable - API key required</div>';
+            }
         }
     }
 

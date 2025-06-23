@@ -537,45 +537,108 @@ async function getTrafficData(timeframe = '24h') {
 // Weather API endpoints
 app.get('/api/weather/current', async (req, res) => {
     try {
-        // Mock weather data since we don't have API keys configured
-        const weatherData = {
+        const apiKey = process.env.OPENWEATHER_API_KEY;
+        if (!apiKey) {
+            throw new Error('OpenWeather API key not configured');
+        }
+        
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=Miami,FL,US&appid=${apiKey}&units=imperial`
+        );
+        
+        if (!response.ok) {
+            throw new Error(`Weather API error: ${response.status}`);
+        }
+        
+        const weatherData = await response.json();
+        
+        res.json({
             success: true,
             location: "Miami, FL",
-            temperature: 78 + Math.floor(Math.random() * 10),
-            description: "Partly Cloudy",
-            humidity: 65 + Math.floor(Math.random() * 20),
-            windSpeed: 8 + Math.floor(Math.random() * 5),
+            temperature: Math.round(weatherData.main.temp),
+            description: weatherData.weather[0].description,
+            humidity: weatherData.main.humidity,
+            windSpeed: weatherData.wind.speed,
+            icon: weatherData.weather[0].icon,
             timestamp: new Date().toISOString()
-        };
-        
-        res.json(weatherData);
+        });
     } catch (error) {
         console.error('❌ Weather API error:', error);
-        res.status(500).json({ error: 'Weather service unavailable' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Weather service unavailable - API key required',
+            message: error.message 
+        });
     }
 });
 
 app.get('/api/weather/forecast', async (req, res) => {
     try {
-        // Mock 5-day forecast
-        const forecast = [];
-        for (let i = 0; i < 5; i++) {
-            const date = new Date();
-            date.setDate(date.getDate() + i);
-            
-            forecast.push({
-                date: date.toISOString().split('T')[0],
-                high: 80 + Math.floor(Math.random() * 8),
-                low: 70 + Math.floor(Math.random() * 8),
-                description: ["Sunny", "Partly Cloudy", "Cloudy", "Light Rain"][Math.floor(Math.random() * 4)],
-                humidity: 60 + Math.floor(Math.random() * 30)
-            });
+        const apiKey = process.env.OPENWEATHER_API_KEY;
+        if (!apiKey) {
+            throw new Error('OpenWeather API key not configured');
         }
         
-        res.json({ success: true, forecast });
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=Miami,FL,US&appid=${apiKey}&units=imperial`;
+        
+        console.log('🌤️ Fetching 5-day weather forecast from OpenWeatherMap...');
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`OpenWeather forecast API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Process forecast data - group by day and get daily highs/lows
+        const dailyForecasts = {};
+        
+        data.list.forEach(item => {
+            const date = new Date(item.dt * 1000).toISOString().split('T')[0];
+            
+            if (!dailyForecasts[date]) {
+                dailyForecasts[date] = {
+                    date: date,
+                    temps: [],
+                    descriptions: [],
+                    icons: [],
+                    humidity: []
+                };
+            }
+            
+            dailyForecasts[date].temps.push(item.main.temp);
+            dailyForecasts[date].descriptions.push(item.weather[0].description);
+            dailyForecasts[date].icons.push(item.weather[0].icon);
+            dailyForecasts[date].humidity.push(item.main.humidity);
+        });
+        
+        // Convert to final forecast format
+        const forecast = Object.values(dailyForecasts).slice(0, 5).map(day => ({
+            date: day.date,
+            high: Math.round(Math.max(...day.temps)),
+            low: Math.round(Math.min(...day.temps)),
+            description: day.descriptions[0], // Use first description of the day
+            humidity: Math.round(day.humidity.reduce((a, b) => a + b, 0) / day.humidity.length),
+            icon: day.icons[0] // Use first icon of the day
+        }));
+        
+        console.log('✅ Weather forecast data fetched successfully');
+        
+        res.json({ 
+            success: true, 
+            forecast: forecast,
+            count: forecast.length 
+        });
+        
     } catch (error) {
         console.error('❌ Forecast API error:', error);
-        res.status(500).json({ error: 'Forecast service unavailable' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Forecast service unavailable - API key required',
+            forecast: [],
+            message: error.message
+        });
     }
 });
 
