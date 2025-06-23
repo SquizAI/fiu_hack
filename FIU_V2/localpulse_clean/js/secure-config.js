@@ -15,16 +15,73 @@ class SecureConfigLoader {
     }
 
     async loadConfiguration() {
-        // Use fallback configuration directly for now
-        console.log('🔐 Loading fallback configuration with your Mapbox token...');
+        try {
+            // Try to get real configuration from server first
+            console.log('🔐 Loading configuration from server...');
+            const mapboxResponse = await fetch(`${this.configEndpoint}/mapbox-token`);
+            
+            if (mapboxResponse.ok) {
+                const mapboxConfig = await mapboxResponse.json();
+                if (mapboxConfig.accessToken && mapboxConfig.accessToken !== 'YOUR_MAPBOX_TOKEN_HERE') {
+                    console.log('✅ Using real Mapbox token from server');
+                    return this.loadServerConfiguration(mapboxConfig.accessToken);
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ Could not load server configuration:', error);
+        }
+        
+        // Use fallback configuration if server fails
+        console.log('🔐 Loading fallback configuration...');
         return this.loadFallbackConfiguration();
+    }
+
+    loadServerConfiguration(mapboxToken) {
+        // Configuration loaded from server with real tokens
+        this.config = {
+            mapbox: {
+                accessToken: mapboxToken,
+                endpoints: {
+                    geocoding: 'https://api.mapbox.com/geocoding/v5/mapbox.places',
+                    directions: 'https://api.mapbox.com/directions/v5/mapbox/driving'
+                }
+            },
+            location: {
+                coralGables: {
+                    latitude: 25.721,
+                    longitude: -80.268,
+                    zoomLevel: 13,
+                    name: 'Coral Gables, FL'
+                }
+            },
+            cameras: {
+                main: {
+                    streamUrl: 'https://dim-se12.divas.cloud:8200/chan-3732/index.m3u8?token=c92d7fc893d2fcdce18eb1e6ff4d38c80ab7ce907e1e4f97378e9ea50461f77b',
+                    type: 'hls',
+                    name: 'Primary HLS Stream (Live)',
+                    location: 'Miami-Dade Area'
+                }
+            },
+            debug: {
+                environment: 'server',
+                enableLogging: true,
+                useMockData: false
+            },
+            offline: false
+        };
+
+        window.LocalPulseConfig = this.config;
+        this.addSecureAPIMethods();
+        
+        console.log('✅ Server configuration loaded successfully');
+        return this.config;
     }
 
     loadFallbackConfiguration() {
         // Minimal fallback configuration for offline mode
         this.config = {
             mapbox: {
-                accessToken: 'YOUR_MAPBOX_TOKEN_HERE', // Your actual Mapbox token
+                accessToken: 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA', // Your actual Mapbox token as fallback
                 endpoints: {
                     geocoding: 'https://api.mapbox.com/geocoding/v5/mapbox.places',
                     directions: 'https://api.mapbox.com/directions/v5/mapbox/driving'

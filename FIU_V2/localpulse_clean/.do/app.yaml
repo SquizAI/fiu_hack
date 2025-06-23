@@ -26,7 +26,7 @@ services:
     value: "sk-proj-8SLq8VB_Fy9Uq2b1mKJ8nOaLKJQGLH_vIzUe8VgFqKJfSdYfZaG9cMnBxTrQwSdFgHjK"
     type: SECRET
   - key: MAPBOX_PUBLIC_TOKEN
-    value: "pk.eyJ1IjoibWF0dHlzcXVhcnpvbmkiLCJhIjoiY2x3aTZhejJqMGNsdzJqcXlrZzZqMXVqdiJ9.Q3VGQrxjhVzKj8xGDGCGtA"
+    value: "pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA"
     type: SECRET
   - key: CORS_ORIGIN
     value: "*"

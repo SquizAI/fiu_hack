@@ -381,7 +381,7 @@ app.get('/api/config/windy-key', (req, res) => {
 
 app.get('/api/config/mapbox-token', (req, res) => {
     res.json({
-        accessToken: process.env.MAPBOX_PUBLIC_TOKEN || null
+        accessToken: process.env.MAPBOX_PUBLIC_TOKEN || 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA'
     });
 });
 
