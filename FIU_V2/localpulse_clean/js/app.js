@@ -1055,10 +1055,10 @@ class LocalPulseDashboard {
         const ctx = document.getElementById('crime-chart');
         if (!ctx) return;
         
-        // Destroy existing chart if it exists
-        if (window.crimeChartInstance) {
-            window.crimeChartInstance.destroy();
-            window.crimeChartInstance = null;
+        // PROPERLY destroy existing chart using Chart.js official method
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
         }
         
         // Count crimes by type

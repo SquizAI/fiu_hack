@@ -24,7 +24,7 @@ class MapManager {
         
         // Fallback to your actual token if configuration fails
         console.warn('⚠️ Using fallback Mapbox token');
-        return 'YOUR_MAPBOX_TOKEN_HERE';
+        return 'pk.eyJ1IjoibWF0dHlzdGpoIiwiYSI6ImNtYzlkMHd0czFwajUyanB5ajNtb2l3d3QifQ.kioIyWE_H_3em-jpvKDiwA';
     }
 
     initializeMainMap() {
